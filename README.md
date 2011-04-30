@@ -39,7 +39,7 @@ A sample language file:
 exports.pt = {
 # Last updated: Fri Apr 29 2011 17:03:53 GMT-0300 (BRT)
 # chat.html
-	  "like"          : "like"
+    "like"          : "like"
   , "next"          : "próximo"
 # dashboard.html
   , "Likes"         : ""
@@ -113,7 +113,7 @@ app.get '/lang/:lang', (req, res) ->
 	res.redirect req.headers.referer || '/'
 ```
 	
-This will allow you to switch languages easily by creating a link to http://yoursite.com/lang/en. This URL will never be actually used, it will redirect the user back to the referring page (or home).
+This will allow you to switch languages easily by creating a link to http://yoursite.com/lang/en. It will redirect the user back to the referring page (or home) with the new language set.
 
 Notice that it checks if the required translation exists before changing the session var, for consistency. Available language codes will have a property set on the module object.
 
@@ -124,11 +124,15 @@ If you installed this module using npm, you'll have a command line tool called `
 Usage is `pullstrings path_to_views [output file]`
 
 For example, if you're in the root dir of your app and keep your views into `/views`, just run
-    pullstrings views
+```
+pullstrings views
+```
 
 It will print all the collected strings, filenames and a time stamp.
 
 If you want to save it to a file, .i.e. `lang/strings.txt`:
-    pullstrings views lang/strings.txt
+```
+pullstrings views lang/strings.txt
+```
 
 You can then copy that to your language folder to an exports object and proceed translating.
