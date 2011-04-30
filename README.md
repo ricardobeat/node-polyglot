@@ -5,8 +5,6 @@ Localized jQuery templates for node
 
 This is based on [express](http://expressjs.com) and [node-jqtpl](https://github.com/kof/node-jqtpl). It allows you to easily translate strings on your template files. You need sessions enabled (`app.use express.session`) for it to work.
 
-How to use it
-=============
 
 ## Installing
 
