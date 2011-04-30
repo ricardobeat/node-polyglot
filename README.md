@@ -25,7 +25,7 @@ This module defines a new `{{e}}` tag for jqtpl, that you should use like this:
 </ul>
 ```
 
-You can change "e" to anything you want. I think it looks nice. Just avoid overwriting the existent template tags (=, html, etc).
+You can change "e" to anything you want, see _configuration_ below. I think it looks nice like this. Just avoid overwriting the existent template tags (=, html, etc).
 
 ## Setup your language files
 
