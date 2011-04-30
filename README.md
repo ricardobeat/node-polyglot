@@ -8,6 +8,10 @@ This is based on [express](http://expressjs.com) and [node-jqtpl](https://github
 How to use it
 =============
 
+## Installing
+
+    npm install jqtpl-express-i18n
+
 ## Writing your templates
 
 This module defines a new `{{e}}` tag for jqtpl, that you should use like this:
