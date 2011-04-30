@@ -58,14 +58,14 @@ You can also export multiple languages from a single file and name it anything y
 
 ```coffeescript
 exports.es =
-	"Gibberish"  : "Algarabía"
-	"Depone"     : "Deponer"
+  "Gibberish"  : "Algarabía"
+  "Depone"     : "Deponer"
 	
 exports.ru =
   "Gibberish"  : "Тарабарщина"
-	"Depone"     : "Давать показания под присягой" # really??
+  "Depone"     : "Давать показания под присягой" # really??
 	
-exports.jp
+exports.jp =
   "bacon"      : " ベーコン"
   "eggs"       : "卵"
   
@@ -83,23 +83,18 @@ then in your `app.configure` call:
 
 ```coffeescript
 app.configure ->
-  app.use blah blah
+
+  app.use express.blahblahblah
   # ...
   
   i18n.enable app
-  
-```
 
-you can _optionally_ pass some _options_ to it:
-
-```coffeescript
-app.configure ->
-
-  # these are the defaults
+  # or with options
+  # (these are the defaults)
   i18n.enable app, 
-    default: 'en'
-    path: '/lang'
-    tag: 'e'
+      default: 'en' # default language, needed for language switching
+      path: '/lang' # path to language files 
+      tag: 'e' # tag name for jqtpl
   
 ```
 
