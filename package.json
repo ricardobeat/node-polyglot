@@ -1,0 +1,11 @@
+{
+    "name"         : "jqtpl-express-i18n"
+  , "description"  : "A helper for translation and localization of templates using jQuery templates and the Express framework"
+  , "keywords"     : ["jqtpl", "templates", "internationalization", "i18n", "l10n"]
+  , "author"       : "Ricardo Tomasi <ricardobeat@gmail.com> (http://ricardo.cc/)"
+  , "repository"   : { "type": "git", "url": "git://github.com/ricardobeat/jqtpl-express-i18n.git" }
+  , "version"      : "0.1.0"
+  , "engines"      : { "node": "v0.4.3" }
+  , "dependencies" : { "glob": "", "jqtpl": "", "coffee-script": "" }
+  , "bin"          : { "pullstrings": "./bin/pullstrings" }
+}

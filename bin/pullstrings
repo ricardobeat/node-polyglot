@@ -1,0 +1,91 @@
+#!/usr/bin/env coffee
+
+# extracts strings for internationalization
+# will capture matching {{e 'String here'}} from all files in args[1]
+
+fs     = require 'fs'
+path   = require 'path'
+glob   = require 'glob'
+colors = require 'colors'
+
+args = process.argv.slice(2)
+
+inputPath = args.shift()
+if inputPath and inputPath[0] != '/'
+	inputPath = path.join process.cwd(), inputPath
+
+output = args.shift()
+if output and output[0] != '/'
+	output = path.join process.cwd(), output
+
+if not inputPath
+	console.log "please provide a path for the views".red
+	process.exit 1
+
+allStrings = ['# Last updated: '+new Date]
+largest = 0
+maxlength = 40
+
+padString =  (s, i) ->
+	if /^[#\s\r\n]/.test(s)
+		return s
+	
+	### line breaks for long strings
+	# looks like shit :(
+	
+	if s.length > largest
+		words = s.split(' ')
+		multiline = []
+		line = ''
+		while word = words.shift()
+			if line.length < largest-5
+				line += "#{word} "
+			else
+				multiline.push line
+				line = "#{word} "
+				
+		multiline.push line
+		
+		s = multiline.join("\n\t")
+	###
+	
+	s = "	\"#{s}\""
+	s += ' ' while (s.length <= largest)
+	s += ' : ""'
+	return s
+	
+files = glob.globSync inputPath+'/*.html'
+
+collectStrings = (contents) ->
+	pattern = new RegExp /\{\{e\s*["']((?:[^"\\]|\\.)*)["']\s*\}\}/g
+	strings = []
+	largest = 0
+	
+	if pattern.test(contents)
+		filename = file.match(/\w+\.\w+$/)
+		strings.push "\n# #{filename}"
+		pattern.lastIndex = 0
+	
+	while m = pattern.exec contents
+		if m[1]
+			strings.push m[1]
+			largest = m[1].length if maxlength > m[1].length > largest
+			
+	largest += 2 # aspas
+	
+	return strings.map(padString).join("\n")
+
+for file in files
+	contents = fs.readFileSync file, 'utf-8'
+	console.log "reading #{file}".grey
+	allStrings.push collectStrings contents
+	
+if files.length < 1
+	console.log "No .html files found".red
+	process.exit 1
+	
+if output
+	fs.writeFileSync output, allStrings.join("\n")
+	console.log "\nStrings saved to ".green + output.yellow.bold
+else
+	console.log allStrings.join("\n")
