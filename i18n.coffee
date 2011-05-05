@@ -22,7 +22,7 @@ module.exports =
 	
 		# actual translation
 		app.helpers
-			_e: (str) ->
+			__: (str) ->
 				return i18nStrings[this.session?.lang]?[str] or str
 
 		# create custom template tag
