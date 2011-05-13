@@ -1,11 +1,10 @@
 {
-    "name"         : "jqtpl-express-i18n"
-  , "description"  : "A helper for translation and localization of templates using jQuery templates and the Express framework"
-  , "keywords"     : ["jqtpl", "templates", "internationalization", "i18n", "l10n"]
+    "name"         : "express-voyage"
+  , "description"  : "Internationlization for express"
+  , "keywords"     : ["i18n", "L10n", "G10n","internationalization", "globalization", "localization", "templates"]
   , "author"       : "Ricardo Tomasi <ricardobeat@gmail.com> (http://ricardo.cc/)"
-  , "repository"   : { "type": "git", "url": "git://github.com/ricardobeat/jqtpl-express-i18n.git" }
-  , "version"      : "0.1.0"
-  , "engines"      : { "node": "0.4" }
-  , "dependencies" : { "glob": "", "jqtpl": "", "coffee-script": "" }
-  , "bin"          : { "pullstrings": "./bin/pullstrings" }
+  , "repository"   : { "type": "git", "url": "git://github.com/ricardobeat/express-voyage.git" }
+  , "version"      : "0.2.0"
+  , "engines"      : { "node": ">0.3" }
+  , "dependencies" : { }
 }
