@@ -1,0 +1,12 @@
+{
+  "name": "i18n test",
+  "version": "0.0.0",
+  "author": "Ricardo Tomasi <ricardo.tomasi@grifotecnologia.com.br>",
+  "engines": {
+    "node": ">v0.4.5"
+  },
+  "dependencies": {
+    "express": "",
+    "jqtpl": ""
+  }
+}
