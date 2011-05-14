@@ -1,6 +1,6 @@
 express    = require 'express'
 jqtpl      = require 'jqtpl'
-i18n       = require 'express-voyage'
+i18n       = require '../i18n'
 
 # --------------------------- # Application settings
 
@@ -25,7 +25,7 @@ app.configure ->
 			return req.session
 	
 	app.helpers
-		__: i18n.__
+		__: i18n.translate
 		n: i18n.plural
 		languages: i18n.languages
 

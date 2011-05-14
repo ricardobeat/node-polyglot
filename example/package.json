@@ -1,12 +1,11 @@
 {
-  "name": "i18n test",
-  "version": "0.0.0",
-  "author": "Ricardo Tomasi <ricardo.tomasi@grifotecnologia.com.br>",
+  "name": "polyglot",
+  "version": "0.2.0",
+  "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
   "engines": {
     "node": ">v0.4.5"
   },
   "dependencies": {
-    "express": "",
-    "jqtpl": ""
+    "express": ""
   }
 }
