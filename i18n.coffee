@@ -56,11 +56,13 @@ i18n = (opts) ->
 		if acceptHeader
 			languages = acceptHeader.split(/,|;/g).filter (v) ->
 				/^\w{2}(-\w{2})?$/.test v
+			
+		languages ?= []	
 				
 		debug "accepted languages: "+languages.join(', ')
 			
-		if not languages or languages.length < 1
-			languages = [i18n.options.default]
+		if languages.length < 1
+			languages.push i18n.options.default
 			debug "empty Accept-Language header, reverting to default"
 			
 		for lang in languages
@@ -81,8 +83,8 @@ i18n.languages = {}
 i18n.strings   = {}
 
 # where the real thing happens
-i18n.__ = (str) ->
-	return i18n.strings[@session.lang]?[str] or i18n.strings[@session.langbase]?[str] or str
+i18n.translate = (str) ->
+	return i18n.strings[@session?.lang]?[str] or i18n.strings[@session?.langbase]?[str] or str
 	
 n_replace = (str, n) ->
 	return str.replace /%s/g, n
