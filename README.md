@@ -22,7 +22,7 @@ debug mode:
 Expose helpers:
 
     app.helpers({
-        __: i18n.__
+        __: i18n.translate
       , languages: i18n.languages
       , n: i18n.plural // optional
     })
@@ -37,7 +37,7 @@ This example uses [jquery-templates](http://github.com/kof/node-jqtpl),
 
     <p>${ __("string to be translated") }</p>
 
-The `__()` function takes a string and returns a translation based on your current session preferences (`req.session.lang`)`.
+The `translate()` function takes a string and returns a translation based on your current session preferences (`req.session.lang`)`.
 
 ### Plurals
 
@@ -84,6 +84,6 @@ To change the current language call `i18n.setLanguage`, passing the user's sessi
         res.redirect(req.headers.referer || '/')
     })
 
-Now accessing http://yourapp/lang/de will set language to `de`, in case it exists in the i18n.languages object.
+Now accessing http://yourapp/lang/de will set language to `de`, in case it exists within the i18n.languages object.
 
 
