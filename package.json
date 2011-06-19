@@ -1,7 +1,7 @@
 {
     "name"         : "polyglot"
   , "description"  : "i18n module for express"
-  , "keywords"     : ["i18n", "L10n", "G10n","internationalization", "globalization", "localization", "templates"]
+  , "keywords"     : ["i18n", "L10n", "G11n","internationalization", "globalization", "localization", "templates"]
   , "author"       : "Ricardo Tomasi <ricardobeat@gmail.com> (http://ricardo.cc/)"
   , "repository"   : { "type": "git", "url": "git://github.com/ricardobeat/polyglot.git" }
   , "version"      : "0.2.0"
