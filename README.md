@@ -3,13 +3,13 @@ Internationalization for express.js
 
 ## Installing
 
-    npm install express-
+    npm install polyglot
 
 ## How to use
 
 Require it in your app:
 
-    var i18n = require('express-voyage')
+    var i18n = require('polyglot')
 
 Add to your express config:
 
