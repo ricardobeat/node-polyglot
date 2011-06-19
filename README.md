@@ -67,7 +67,7 @@ It also works for untranslated strings:
 
 ## String collection
 
-express-voyage can update your language files automatically, just add this to your app.config (recommended only during development):
+polyglot can update your language files automatically, just add this to your app.config (recommended only during development):
 
     app.configure('development', function(){
        i18n.updateStrings()
