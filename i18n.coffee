@@ -125,7 +125,7 @@ collectStrings = (contents, fn) ->
 	return strings
 
 # parse views for __
-i18n.updateStrings = (fn) ->
+i18n.updateStrings = (req, res, next) ->
 
 	fn ?= '__'
 
@@ -133,10 +133,10 @@ i18n.updateStrings = (fn) ->
 
 	if not path.existsSync(viewsPath)
 		debug "no views found in #{viewsPath}"
-		return
+		return next()
 		
 	views = fs.readdirSync(viewsPath).filter (file) ->
-		return /\w+.(htm|html|ejs|tpl)$/.test file
+		return /\w+\.(htm|html|ejs|tpl)$/.test file
 	
 	for view in views
 		debug "collecting strings from #{view}"
@@ -145,9 +145,12 @@ i18n.updateStrings = (fn) ->
 			devStrings[string] = 1
 
 	files = fs.readdirSync( process.cwd() + i18n.options.path ).filter (file) ->
-		debug "loading language file #{file}"
-		# accept either pt-BR.json or pt.json
-		return /\w{2}(-\w{2})?\.json$/.test file
+		# accept pt.json or pt-BR.json formats
+		if /^\w{2}(-\w\w)?\.json$/.test file
+			debug "loading language file #{file}"
+			return true
+		else
+			return false
 		
 	for file in files
 		
@@ -169,5 +172,7 @@ i18n.updateStrings = (fn) ->
 		
 		fs.writeFileSync(filePath, JSON.stringify(strings, null, "\t"), 'utf8')
 		debug "updated strings in #{file}"
+		
+	next()
 
 module.exports = i18n

@@ -57,11 +57,9 @@
           return /^\w{2}(-\w{2})?$/.test(v);
         });
       }
-            if (languages != null) {
-        languages;
-      } else {
+      if (languages == null) {
         languages = [];
-      };
+      }
       debug("accepted languages: " + languages.join(', '));
       if (languages.length < 1) {
         languages.push(i18n.options["default"]);
@@ -127,20 +125,18 @@
     }
     return strings;
   };
-  i18n.updateStrings = function(fn) {
-    var contents, file, filePath, files, s, string, strings, translation, v, view, views, viewsPath, _i, _j, _k, _len, _len2, _len3, _ref, _results;
-        if (fn != null) {
-      fn;
-    } else {
+  i18n.updateStrings = function(req, res, next) {
+    var contents, file, filePath, files, s, string, strings, translation, v, view, views, viewsPath, _i, _j, _k, _len, _len2, _len3, _ref;
+    if (typeof fn === "undefined" || fn === null) {
       fn = '__';
-    };
+    }
     viewsPath = process.cwd() + i18n.options.views;
     if (!path.existsSync(viewsPath)) {
       debug("no views found in " + viewsPath);
-      return;
+      return next();
     }
     views = fs.readdirSync(viewsPath).filter(function(file) {
-      return /\w+.(htm|html|ejs|tpl)$/.test(file);
+      return /\w+\.(htm|html|ejs|tpl)$/.test(file);
     });
     for (_i = 0, _len = views.length; _i < _len; _i++) {
       view = views[_i];
@@ -153,10 +149,13 @@
       }
     }
     files = fs.readdirSync(process.cwd() + i18n.options.path).filter(function(file) {
-      debug("loading language file " + file);
-      return /\w{2}(-\w{2})?\.json$/.test(file);
+      if (/^\w{2}(-\w\w)?\.json$/.test(file)) {
+        debug("loading language file " + file);
+        return true;
+      } else {
+        return false;
+      }
     });
-    _results = [];
     for (_k = 0, _len3 = files.length; _k < _len3; _k++) {
       file = files[_k];
       filePath = process.cwd() + i18n.options.path + '/' + file;
@@ -177,10 +176,11 @@
           delete strings[string];
         }
       }
+      console.log(strings);
       fs.writeFileSync(filePath, JSON.stringify(strings, null, "\t"), 'utf8');
-      _results.push(debug("updated strings in " + file));
+      debug("updated strings in " + file);
     }
-    return _results;
+    return next();
   };
   module.exports = i18n;
 }).call(this);
