@@ -23,11 +23,11 @@
     i18n.languages[options["default"]] = true;
     if (path.existsSync(process.cwd() + options.path)) {
       files = fs.readdirSync(process.cwd() + options.path).filter(function(file) {
-        return /\w{2}(-\w{2})?\.json$/.test(file);
+        return /\w{2}(-\w\w)?\.json$/.test(file);
       });
       for (_i = 0, _len = files.length; _i < _len; _i++) {
         file = files[_i];
-        _ref = file.match(/^(\w{2})(-\w{2})?/), country = _ref[0], lang = _ref[1];
+        _ref = file.match(/^(\w{2})(-\w\w)?/), country = _ref[0], lang = _ref[1];
         try {
           data = JSON.parse(fs.readFileSync(process.cwd() + options.path + '/' + file, 'utf8'));
           lang = lang.toLowerCase();
@@ -47,14 +47,12 @@
     return function(req, res, next) {
       var acceptHeader, lang, languages, _j, _len2, _ref2;
       if (((_ref2 = req.session) != null ? _ref2.lang : void 0) != null) {
-        debug("current language: " + req.session.lang);
-        next();
-        return;
+        return next();
       }
       acceptHeader = req.header('Accept-Language');
       if (acceptHeader) {
         languages = acceptHeader.split(/,|;/g).filter(function(v) {
-          return /^\w{2}(-\w{2})?$/.test(v);
+          return /^\w{2}(-\w\w)?$/.test(v);
         });
       }
       if (languages == null) {
@@ -77,6 +75,7 @@
         req.session.lang = i18n.options["default"];
         req.session.langbase = i18n.options["default"];
       }
+      debug("language set to " + lang);
       return next();
     };
   };
@@ -125,15 +124,15 @@
     }
     return strings;
   };
-  i18n.updateStrings = function(req, res, next) {
-    var contents, file, filePath, files, s, string, strings, translation, v, view, views, viewsPath, _i, _j, _k, _len, _len2, _len3, _ref;
-    if (typeof fn === "undefined" || fn === null) {
+  i18n.updateStrings = function(fn) {
+    var contents, file, filePath, files, s, string, strings, translation, v, view, views, viewsPath, _i, _j, _k, _len, _len2, _len3, _ref, _results;
+    if (fn == null) {
       fn = '__';
     }
     viewsPath = process.cwd() + i18n.options.views;
     if (!path.existsSync(viewsPath)) {
       debug("no views found in " + viewsPath);
-      return next();
+      return;
     }
     views = fs.readdirSync(viewsPath).filter(function(file) {
       return /\w+\.(htm|html|ejs|tpl)$/.test(file);
@@ -156,11 +155,14 @@
         return false;
       }
     });
+    _results = [];
     for (_k = 0, _len3 = files.length; _k < _len3; _k++) {
       file = files[_k];
       filePath = process.cwd() + i18n.options.path + '/' + file;
       try {
-        strings = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        contents = fs.readFileSync(filePath, 'utf8');
+        strings = JSON.parse(contents);
+        fs.writeFileSync(filePath + '.backup', contents, 'utf8');
       } catch (e) {
         strings = {};
       }
@@ -176,11 +178,10 @@
           delete strings[string];
         }
       }
-      console.log(strings);
       fs.writeFileSync(filePath, JSON.stringify(strings, null, "\t"), 'utf8');
-      debug("updated strings in " + file);
+      _results.push(debug("updated strings in " + file));
     }
-    return next();
+    return _results;
   };
   module.exports = i18n;
 }).call(this);

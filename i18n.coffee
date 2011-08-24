@@ -26,11 +26,11 @@ i18n = (opts) ->
 		
 		files = fs.readdirSync( process.cwd() + options.path ).filter (file) ->
 			# accept either pt-BR.json or pt.json
-			return /\w{2}(-\w{2})?\.json$/.test file
+			return /\w{2}(-\w\w)?\.json$/.test file
 	
 		# load language files
 		for file in files
-			[country, lang] = file.match /^(\w{2})(-\w{2})?/
+			[country, lang] = file.match /^(\w{2})(-\w\w)?/
 			try
 				data = JSON.parse fs.readFileSync( process.cwd() + options.path + '/' + file, 'utf8')
 				lang = lang.toLowerCase()
@@ -45,19 +45,17 @@ i18n = (opts) ->
 
 	# sets users language
 	return (req, res, next) ->
-	
+		
 		if req.session?.lang?
-			debug "current language: #{req.session.lang}"
-			next()
-			return
+			return next()
 	
 		acceptHeader = req.header('Accept-Language')
 
 		if acceptHeader
 			languages = acceptHeader.split(/,|;/g).filter (v) ->
-				/^\w{2}(-\w{2})?$/.test v
+				/^\w{2}(-\w\w)?$/.test v
 			
-		languages ?= []	
+		languages ?= []
 				
 		debug "accepted languages: "+languages.join(', ')
 			
@@ -75,6 +73,8 @@ i18n = (opts) ->
 		if req.session? and not req.session.lang?
 			req.session.lang = i18n.options.default
 			req.session.langbase = i18n.options.default
+		
+		debug "language set to #{lang}"
 		
 		next()
 		
@@ -125,7 +125,7 @@ collectStrings = (contents, fn) ->
 	return strings
 
 # parse views for __
-i18n.updateStrings = (req, res, next) ->
+i18n.updateStrings = (fn) ->
 
 	fn ?= '__'
 
@@ -133,7 +133,7 @@ i18n.updateStrings = (req, res, next) ->
 
 	if not path.existsSync(viewsPath)
 		debug "no views found in #{viewsPath}"
-		return next()
+		return
 		
 	views = fs.readdirSync(viewsPath).filter (file) ->
 		return /\w+\.(htm|html|ejs|tpl)$/.test file
@@ -157,7 +157,9 @@ i18n.updateStrings = (req, res, next) ->
 		# TODO: check modification date to avoid unnecessary updates
 		filePath = process.cwd() + i18n.options.path + '/' + file
 		try
-			strings = JSON.parse fs.readFileSync(filePath, 'utf8')
+			contents = fs.readFileSync(filePath, 'utf8')
+			strings = JSON.parse contents
+			fs.writeFileSync(filePath+'.backup', contents, 'utf8')
 		catch e
 			strings = {}
 		
@@ -172,7 +174,5 @@ i18n.updateStrings = (req, res, next) ->
 		
 		fs.writeFileSync(filePath, JSON.stringify(strings, null, "\t"), 'utf8')
 		debug "updated strings in #{file}"
-		
-	next()
 
 module.exports = i18n
