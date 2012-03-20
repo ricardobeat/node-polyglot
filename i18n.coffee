@@ -20,7 +20,7 @@ i18n = (opts) ->
 		options[key] = val
 	
 	# flag language existence	
-	i18n.languages[options.default] = true
+	i18n.languages.push options.default
 
 	if path.existsSync(process.cwd() + options.path)
 		
@@ -36,7 +36,7 @@ i18n = (opts) ->
 				lang = lang.toLowerCase()
 				i18n.strings[lang] = data
 				if lang != country then i18n.strings[country.toLowerCase()] = data
-				i18n.languages[lang] = true
+				i18n.languages.push lang
 				debug "loaded #{file}"
 			catch e
 				debug "failed to load language file #{file}"
@@ -79,7 +79,8 @@ i18n = (opts) ->
 		next()
 		
 # keep track of active languages
-i18n.languages = {}
+i18n.languages = []
+# Translations will be stored here
 i18n.strings   = {}
 
 # where the real thing happens
@@ -146,7 +147,7 @@ i18n.updateStrings = (fn) ->
 
 	files = fs.readdirSync( process.cwd() + i18n.options.path ).filter (file) ->
 		# accept pt.json or pt-BR.json formats
-		if /^\w{2}(-\w\w)?\.json$/.test file
+		if /^\w{2}([-_]\w\w)?\.json$/.test file
 			debug "loading language file #{file}"
 			return true
 		else
