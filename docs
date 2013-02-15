@@ -1,0 +1,2 @@
+docco -o ./ i18n.coffee
+mv i18n.html index.html
