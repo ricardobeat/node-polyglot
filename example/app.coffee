@@ -1,50 +1,54 @@
-express    = require 'express'
-jqtpl      = require 'jqtpl'
-i18n       = require '../i18n'
+http    = require 'http'
+express = require 'express'
+hbs     = require 'hbs'
+i18n    = require '../i18n.coffee'
 
-# --------------------------- # Application settings
+# Application settings
+# ---------------------
 
-app = express.createServer()
-console.log new Date().toTimeString()
+app    = express()
+server = http.createServer(app)
+
+hbs.registerHelper "equals", (a, b, options) ->
+	return if a == b then options.fn(@) else options.inverse(@)
+
+hbs.registerHelper "_", i18n.translate
 
 app.configure ->
 	app.set 'root', __dirname
 	app.set 'view engine', 'html'
-	app.register '.html', jqtpl.express
+	app.engine 'html', hbs.__express
 
-	app.use express.methodOverride()
-	app.use express.bodyParser()
 	app.use express.cookieParser()
-	app.use express.session
-	    secret: 'sauce'
+	app.use express.cookieSession secret: 'trolololol'
 	app.use i18n({ debug: true })
+	app.locals i18n.locals
 	app.use app.router
-					
-	app.dynamicHelpers
-		session: (req, res) ->
-			return req.session
-	
-	app.helpers
-		__: i18n.translate
-		n: i18n.plural
-		languages: i18n.languages
+	app.use express.static "#{__dirname}/public"
 
 app.configure 'development', ->
-	i18n.updateStrings()
+	app.use i18n.updateStrings
 	app.use express.errorHandler
 		dumpExceptions: true
 		showStack: true
 		
-# --------------------------- # Default pages
+# Default pages
+# --------------
 
 # Home
 app.get '/', (req, res) ->
 	res.render 'index'
+
+app.get '/clear', (req, res) ->
+	req.session = null
+	res.redirect '/'
 	
-# --------------------------- # Switch languages
+# Switch languages
+# -----------------
 
 app.get '/lang/:lang', (req, res) ->
-	i18n.setLanguage(req.session, req.params.lang)
+	i18n.setLanguage req.session, req.params.lang
 	res.redirect req.headers.referer || '/'
 
-app.listen(3000)
+server.listen 4567
+console.log "Server listening @ 4567"

@@ -1,8 +1,9 @@
 {
-	"cookie": "biscoito",
-	"bacon": "",
-	"tea": "chá",
-	"%s cup": "%s xícara",
-	"%s cups": "%s xícaras",
-	"no cups": "nenhuma xícara"
+    "%s cup": "%s xícara",
+    "%s cups": "%s xícaras",
+    "no cups": "nenhuma xícara",
+    "cookie": "biscoito",
+    "bacon": "bacon",
+    "tea": "chá",
+    "and": "e"
 }

@@ -1,0 +1,47 @@
+html, body {
+    margin: 0;
+    paddding: 0;
+}
+
+#header {
+    background: #555;
+    overflow: hidden;
+}
+
+#header h1 {
+    margin: 0;
+    padding: 30px;
+    color: #eee;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.2);
+    font-family: "Helvetica Neue", sans-serif;
+    font-weight: 100;
+    float: left;
+}
+
+#languages {
+    float: left;
+    margin: 30px;
+}
+
+#languages li {
+    border-radius: 4px;
+    background: #999;
+    padding: 8px;
+    display: inline-block;
+}
+
+#languages a {
+    text-decoration: none;
+    color: #000;
+}
+
+#languages .active {
+    background: #ff3;
+}
+
+#main {
+    padding: 20px 40px;
+    max-width: 980px;
+    margin: 0 auto;
+    font-size: 18px;
+}

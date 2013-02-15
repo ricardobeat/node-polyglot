@@ -1,179 +1,197 @@
 path   = require 'path'
 fs     = require 'fs'
 
-devStrings = {}
-	
+# Debug helper, enable with option `debug: true` when calling `i18n()`.
 debug = (str) ->
 	i18n.options.debug && console.log "[i18n] #{str}"
 
+# Main method
+# ------------
+# Sets options, loads language files and returns an express middleware function.
+
 i18n = (opts) ->
 		
-	#default options
+	# Options
 	options = i18n.options =
 		default: 'en'
 		path: '/lang'
 		views: '/views'
 		debug: false
 
-	# override defaults
 	for own key, val of opts
 		options[key] = val
 	
-	# flag language existence	
 	i18n.languages.push options.default
+	i18n.loadLanguageFiles()
 
-	if path.existsSync(process.cwd() + options.path)
-		
-		files = fs.readdirSync( process.cwd() + options.path ).filter (file) ->
-			# accept either pt-BR.json or pt.json
-			return /\w{2}(-\w\w)?\.json$/.test file
-	
-		# load language files
-		for file in files
-			[country, lang] = file.match /^(\w{2})(-\w\w)?/
-			try
-				data = JSON.parse fs.readFileSync( process.cwd() + options.path + '/' + file, 'utf8')
-				lang = lang.toLowerCase()
-				i18n.strings[lang] = data
-				if lang != country then i18n.strings[country.toLowerCase()] = data
-				i18n.languages.push lang
-				debug "loaded #{file}"
-			catch e
-				debug "failed to load language file #{file}"
-	else
-		debug "path #{options.path} doesn't exist"
-
-	# sets users language
 	return (req, res, next) ->
-		
-		if req.session?.lang?
-			return next()
-	
-		acceptHeader = req.header('Accept-Language')
 
-		if acceptHeader
-			languages = acceptHeader.split(/,|;/g).filter (v) ->
-				/^\w{2}(-\w\w)?$/.test v
-			
-		languages ?= []
+		# User doesn't have a language setting yet		
+		unless req.session?.lang?
+			locale             = i18n.getLocale req, options
+			req.session.locale = locale
+			req.session.lang   = locale[0..2]
+			debug "Language set to #{lang}"
 				
-		debug "accepted languages: "+languages.join(', ')
-			
-		if languages.length < 1
-			languages.push i18n.options.default
-			debug "empty Accept-Language header, reverting to default"
-			
-		for lang in languages
-			lang = lang.toLowerCase()
-			if i18n.languages[lang] and req.session?
-				req.session.lang = lang.toLowerCase()
-				req.session.langbase = lang.toLowerCase().substring(0,2)
-				
-		# default to EN
-		if req.session? and not req.session.lang?
-			req.session.lang = i18n.options.default
-			req.session.langbase = i18n.options.default
-		
-		debug "language set to #{lang}"
+		# Register template locals
+		res.locals
+			locale : req.session.locale
+			lang   : req.session.lang
 		
 		next()
-		
-# keep track of active languages
-i18n.languages = []
-# Translations will be stored here
-i18n.strings   = {}
 
-# where the real thing happens
-i18n.translate = (str) ->
-	return i18n.strings[@session?.lang]?[str] or i18n.strings[@session?.langbase]?[str] or str
+# Languages list
+# ---------------
+# List of active languages, excluding `i18n.options.default`.
+
+i18n.languages = []
+
+
+# Translation strings
+# --------------------
+# In-memory strings. They are flushed to disk using `i18n.updateStrings`.
+
+i18n.strings = {}
+
+
+# Default template locals
+# ------------------------
+# `lang` and `locale` are also set on a per-request basis (see middleware function).
+
+i18n.locals = {
+	__        : i18n.translate
+	_n        : i18n.plural
+	languages : i18n.languages
+}
+
+# Language files loader
+# ----------------------
+# # Load `json` language files on startup.
+
+i18n.loadLanguageFiles = ->
+	dir = i18n.options.path
+
+	if fs.existsSync(process.cwd() + dir)
+		files = fs.readdirSync(process.cwd() + dir)
+			.map((f) -> path.basename f, '.json')
+			.filter i18n.isValidLocale
 	
-n_replace = (str, n) ->
-	return str.replace /%s/g, n
-	
-# ([zero], single, plural, n)
-i18n.plural = (zero, single, plural, _n) ->
-	if not _n?
-		_n = n = plural 
-		if n > 1 then n = 1
-		else if n < 2 then n = 0
+		for locale in files when locale isnt i18n.options.default
+			filePath = path.join process.cwd(), dir, locale + '.json'
+			try
+				data = JSON.parse fs.readFileSync(filePath).toString()
+				i18n.strings[locale] = data
+				i18n.languages.push locale
+				debug "loaded #{locale}.json"
+			catch e
+				debug "failed to load language file #{filePath}"
 	else
-		n = _n
-		if n > 2 then n = 2
-		else if n < 1 then n = 0
-	
-	return n_replace arguments[n], _n
-	
+		debug "path #{dir} doesn't exist"
+
+# Locale validation
+# ------------------
+# Test if a locale is in the format `xx` or `xx-YY`.
+
+i18n.isValidLocale = (locale) ->
+	return /^\w\w(-\w\w)?$/.test locale
+
+
+# Accept-Language
+# ----------------
+# Parses an `Accept-Language` header, adds values to the `languages` list and
+# returns the preferred language.
+
+i18n.getLocale = (req) ->
+	languages = []
+	acceptHeader = req.header('Accept-Language')
+	if acceptHeader then languages = acceptHeader.split(/,|;/g).filter i18n.isValidLocale
+			
+	debug "Accepted languages: "+languages.join(', ')
+		
+	if languages.length < 1
+		languages.push i18n.options.default
+		debug "Empty Accept-Language header, reverting to default"
+		
+	for locale in languages when i18n.languages[locale]
+		locale = locale.toLowerCase() 
+
+	# Fallback to default
+	locale or= languages[0]
+
+	return locale
+
+
+# i18n.plurals
+# -------------
+# Arguments can be `[n, singular, plural]` or `[n, zero, singular, plural]`.
+# Is invoked by `i18n.translate` when given the correct number ofr arguments.
+
+i18n.plural = (str, zero, one, more) ->
+	if typeof more isnt 'string' then [one, more, zero] = [zero, one, one]
+	word = switch true
+		when str is 0 then zero
+		when str is 1 then one
+		when str  > 1 then more
+	return i18n.translate.call(@, word).replace /%s/g, str
+
+
+# i18n.translate
+# ---------------
+# This is the method used as a template local, usually aliased to '_'.
+
+i18n.translate = (str) ->
+	# Handle plurals.
+	# Using `apply` and `call` to keep methods in context of this request.
+	if not isNaN(str) and arguments.length > 2
+		return i18n.plural.apply @, arguments
+
+	# Get or create language object, skipping the default language.
+	localStrings = (i18n.strings[@locale] or i18n.strings[@lang])
+	if not localStrings? and @lang isnt i18n.options.default
+		localStrings = i18n.strings[@lang] = {}
+
+	# Add string to translations if missing
+	localStrings && localStrings[str] ?= ''
+
+	# Get translation
+	return localStrings?[str] or str or ''
+
+
+# i18n.setLanguage
+# -----------------
+# Change language setting for the current user.
+
 i18n.setLanguage = (session, lang) ->
-	if i18n.languages[lang]
+	if lang in i18n.languages
 		session.lang = lang
 		session.langbase = lang.substring(0,2)
-				
-collectStrings = (contents, fn) ->
-	pattern = new RegExp ///
-	#{fn}\(              # opening parenthesis
-	(["'])               # opening quote
-	((?:(?!\1)[^\\]|\\.)*) # string
-	\1                   # closing quote
-	\)                   # closing parenthesis
-	///g
-	
-	strings = []
-	
-	while m = pattern.exec contents
-		if m[2] and m[2].length > 1
-			strings.push m[2]
-	
-	return strings
+		debug "Language set to #{lang}"
 
-# parse views for __
-i18n.updateStrings = (fn) ->
 
-	fn ?= '__'
+# i18n.updateStrings
+# -------------------
+# Save new strings to language files, use in development mode.
 
-	viewsPath = process.cwd() + i18n.options.views
+i18n.updateStrings = (req, res, next) ->
+	basePath = path.join process.cwd(), i18n.options.path
 
-	if not path.existsSync(viewsPath)
-		debug "no views found in #{viewsPath}"
-		return
-		
-	views = fs.readdirSync(viewsPath).filter (file) ->
-		return /\w+\.(htm|html|ejs|tpl)$/.test file
-	
-	for view in views
-		debug "collecting strings from #{view}"
-		contents = fs.readFileSync("#{viewsPath}/#{view}").toString()
-		for string in collectStrings(contents, fn)
-			devStrings[string] = 1
+	for lang, strings of i18n.strings when i18n.isValidLocale lang
+		file = "#{lang}.json"
+		filePath = path.join(basePath, file)
+		# Re-load file and merge in-memory strings
+		fs.readFile filePath, (err, res) ->
+			try contents = JSON.parse res.toString()
+			catch e then contents = {}
+			finally
+				# Update in-memory translations or add new strings
+				for s, t of strings
+					if contents[s] then i18n.strings[lang][s] = contents[s]
+					else contents[s] = t
 
-	files = fs.readdirSync( process.cwd() + i18n.options.path ).filter (file) ->
-		# accept pt.json or pt-BR.json formats
-		if /^\w{2}([-_]\w\w)?\.json$/.test file
-			debug "loading language file #{file}"
-			return true
-		else
-			return false
-		
-	for file in files
-		
-		# TODO: check modification date to avoid unnecessary updates
-		filePath = process.cwd() + i18n.options.path + '/' + file
-		try
-			contents = fs.readFileSync(filePath, 'utf8')
-			strings = JSON.parse contents
-			fs.writeFileSync(filePath+'.backup', contents, 'utf8')
-		catch e
-			strings = {}
-		
-		# add new strings
-		for s, v of devStrings
-			if not strings[s]?
-				strings[s] = ""
-				
-		for string, translation of strings
-			if not devStrings[string]
-				delete strings[string]
-		
-		fs.writeFileSync(filePath, JSON.stringify(strings, null, "\t"), 'utf8')
-		debug "updated strings in #{file}"
+			fs.writeFile filePath, JSON.stringify(contents, null, 4), 'utf8'
+			debug "Updated strings in #{file}"
+
+	next()
+
 
 module.exports = i18n
