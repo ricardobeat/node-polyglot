@@ -66,7 +66,7 @@ i18n.locals = {
 
 # Language files loader
 # ----------------------
-# # Load `json` language files on startup.
+# Load `json` language files on startup.
 
 i18n.loadLanguageFiles = ->
 	dir = i18n.options.path
