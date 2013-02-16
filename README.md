@@ -1,7 +1,7 @@
 Polyglot
 ========
 
-Polyglot is an internationalization library for [express](http://github.com/visionmedia/express). It's template-agnostic, based on JSON files, and less than 200 lines of code. Compatible with express 3+.
+Polyglot is an internationalization library for [express](http://github.com/visionmedia/express). It's template-agnostic, based on JSON files, dependency-free and less than 200 lines of code. Compatible with express 3+.
 
 ## Usage
 
