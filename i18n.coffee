@@ -30,7 +30,7 @@ i18n = (opts) ->
 			locale             = i18n.getLocale req, options
 			req.session.locale = locale
 			req.session.lang   = locale[0..2]
-			debug "Language set to #{lang}"
+			debug "Language set to #{req.session.lang}"
 				
 		# Register template locals
 		res.locals
