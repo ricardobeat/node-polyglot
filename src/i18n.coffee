@@ -1,33 +1,33 @@
 path   = require 'path'
 fs     = require 'fs'
 
-# Debug helper, enable with option `debug: true` when calling `i18n()`.
+_     = require './util'
+
+# Log messages, enable with option `debug: true`.
 debug = (str) ->
 	i18n.options.debug && console.log "[i18n] #{str}"
 
-# Main method
+# Polyglot
 # ------------
 # Sets options, loads language files and returns an express middleware function.
 
-i18n = (opts) ->
+i18n = (options) ->
 		
 	# Options
-	options = i18n.options =
+	i18n.options = _.extend {
 		default: 'en'
 		path: '/lang'
 		debug: false
-
-	for own key, val of opts
-		options[key] = val
+	}, options
 	
-	i18n.languages.push options.default
+	i18n.languages.push i18n.options.default
 	i18n.loadLanguageFiles()
 
 	return (req, res, next) ->
 
 		# User doesn't have a language setting yet		
 		unless req.session?.lang?
-			locale             = i18n.getLocale req, options
+			locale             = i18n.getLocale req
 			req.session.locale = locale
 			req.session.lang   = locale[0..2]
 			debug "Language set to #{req.session.lang}"
@@ -73,7 +73,7 @@ i18n.loadLanguageFiles = ->
 	if fs.existsSync(process.cwd() + dir)
 		files = fs.readdirSync(process.cwd() + dir)
 			.map((f) -> path.basename f, '.json')
-			.filter i18n.isValidLocale
+			.filter _.isValidLocale
 	
 		for locale in files when locale isnt i18n.options.default
 			filePath = path.join process.cwd(), dir, locale + '.json'
@@ -102,10 +102,8 @@ i18n.isValidLocale = (locale) ->
 
 i18n.getLocale = (req) ->
 	languages = []
-	acceptHeader = req.header('Accept-Language')
-	if acceptHeader then languages = acceptHeader.split(/,|;/g).filter i18n.isValidLocale
-			
-	debug "Accepted languages: "+languages.join(', ')
+	if acceptHeader = req.header('Accept-Language')
+		languages = acceptHeader.split(/,|;/g).filter i18n.isValidLocale
 		
 	if languages.length < 1
 		languages.push i18n.options.default

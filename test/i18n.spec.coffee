@@ -1,5 +1,5 @@
 assert = require 'assert'
-polyglot = require '../i18n.coffee'
+polyglot = require '../'
 
 describe 'Parse headers', ->
 

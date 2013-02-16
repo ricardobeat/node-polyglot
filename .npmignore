@@ -1,4 +1,7 @@
-*.coffee
-README.md
+node_modules
+.DS_Store
+
+src
+Cakefile
 example
 test
