@@ -1,3 +1,4 @@
 *.coffee
 README.md
-./example
+example
+test

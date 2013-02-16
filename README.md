@@ -1,81 +1,82 @@
-Internationalization for express.js
-====================================
+Polyglot
+========
 
-## Installing
+Polyglot is an internationalization library for [express](http://github.com/visionmedia/express). It's template-agnostic, based on JSON files, and less than 200 lines of code. Compatible with express 3+.
 
-    npm install polyglot
+## Usage
 
-## How to use
-
-Require it in your app:
+Install with `npm install polyglot`:
 
     var i18n = require('polyglot')
 
-Add to your express config:
+    app = express()
 
-    app.use( i18n() )
+    app.use(express.cookieParser())
+    app.use(express.cookieSession())
+    app.use(i18n())
 
-debug mode:
+    # register template locals
+    app.locals(i18n.locals)
 
-	app.use( i18n({ debug: true }) )
-	
-Expose helpers:
+Check the [example](https://github.com/ricardobeat/node-polyglot/tree/master/example) app.
 
-    app.helpers({
-        __: i18n.translate
-      , languages: i18n.languages
-      , n: i18n.plural // optional
-    })
+### Options
+
+    app.use(i18n({
+        debug   : false    // enable debug messages
+      , default : 'en'     // default language
+      , path    : '/lang'  // path for .json language files
+    }))
 
 ### Language files
 
-Translation files are simply .json files, where strings are mapped 1 to 1. By default it looks for these files in `/lang`. To add a new language, just create an empty .json file with the language code as it's name (i.e. `de.json`).
+Translation files are `.json` files containing the translated strings. The default directory is `/lang`. To add a new language, just create an empty .json file with the language code as it's name (i.e. `de.json`).
 
-### Templating
+See https://github.com/ricardobeat/node-polyglot/blob/master/example/lang/pt.json
 
-This example uses [jquery-templates](http://github.com/kof/node-jqtpl), 
-
-    <p>${ __("string to be translated") }</p>
-
-The `translate()` function takes a string and returns a translation based on your current session preferences (`req.session.lang`)`.
-
-### Plurals
-
-You can optionally expose the `i18n.plural` function.
-
-    app.helpers({
-        _n: i18n.plural
-    })
-    
-It takes 3 or 4 arguments: `[none], single, plural, n_items`, each a translatable string, and returns the corresponding one:
-
-    <p>${ _n(__("no items"),__("1 item"),__("%s items"), items.length) }</p>
-    <p>${ _n(__("%s item"),__("%s items"), number) }</p>
-
-It also works for untranslated strings:
-
-    <p>${ _n("%s item","%s items", 2) }</p>
-
-## Options
-
-    i18n({
-        default: 'en'   // default language
-      , path:  '/lang'   // path to language files
-      , views: '/views' // path to view files (for automatic updates)
-      , debug: false    // enable debug mode
-    })
-
-## String collection
-
-polyglot can update your language files automatically, just add this to your app.config (recommended only during development):
+String definitions are automatically added to all available languages by adding the `updateStrings` middleware to your express config:
 
     app.configure('development', function(){
-       i18n.updateStrings()
+        app.use(i18n.updateStrings)
     })
 
-(more info about development mode in the [express guide](http://express.js.com/guide))
+### Templating / locals
 
-## Language switching
+All the following examples are based on [handlebars](http://github.com/donpark/hbs) templates.
+
+Registering `app.locals(i18n.locals)` is simply a shortcut for:
+
+    app.locals({
+        __        : i18n.translate
+      , _n        : i18n.plural
+      , languages : i18n.languages
+    })
+
+In addition to that, `i18n()` registers a middleware which sets `req.lang` and `req.locale` containing the user's settings.
+
+See the `/example` folder for an implementation using Handlebars helpers.
+
+#### i18n.translate
+
+Takes a string and returns a translation based on your current session preferences (`req.session.lang`)`.
+
+     {{ __('hello') }}
+     // en: 'hello'
+     // pt: 'olá'
+
+#### i18n.plural
+
+Takes `[n, singular, plural]` or `[n, zero, singular, plural]` arguments. Using `i18n.translate` with the same arguments will use plural automatically.
+
+    {{ __(1, "%s cat", "%s cats") }}
+    // en: '1 cat'
+    // pt: '1 gato'
+
+    {{ __(0, "no cats", "%s cat", "%s cats") }}
+    // en: 'no cats'
+    // pt: 'nenhum gato'
+
+#### i18n.setLanguage
 
 To change the current language call `i18n.setLanguage`, passing the user's session object and desired language code:
 
@@ -84,6 +85,10 @@ To change the current language call `i18n.setLanguage`, passing the user's sessi
         res.redirect(req.headers.referer || '/')
     })
 
-Now accessing http://yourapp/lang/de will set language to `de`, in case it exists within the i18n.languages object.
+Accessing http://yourapp/lang/de will set language to `de`, *if* it is defined in the i18n.languages object.
 
+### Source code and tests
 
+Polyglot is written in coffeescript and distributed in js. [Read the annotated source here](http://ricardobeat.github.com/node-polyglot).
+
+Run tests using `mocha` or `npm test`. You need `coffee-script` and `mocha` installed globally on your machine.
