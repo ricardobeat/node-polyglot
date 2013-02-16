@@ -144,10 +144,7 @@ i18n.translate = (str) ->
 	if not isNaN(str) and arguments.length > 2
 		return i18n.plural.apply @, arguments
 
-	# Get or create language object, skipping the default language.
 	localStrings = (i18n.strings[@locale] or i18n.strings[@lang])
-	if not localStrings? and @lang isnt i18n.options.default
-		localStrings = i18n.strings[@lang] = {}
 
 	# Add string to translations if missing
 	localStrings && localStrings[str] ?= ''
