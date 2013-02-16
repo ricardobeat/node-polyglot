@@ -15,7 +15,6 @@ i18n = (opts) ->
 	options = i18n.options =
 		default: 'en'
 		path: '/lang'
-		views: '/views'
 		debug: false
 
 	for own key, val of opts
