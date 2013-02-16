@@ -1,7 +1,7 @@
 http    = require 'http'
 express = require 'express'
 hbs     = require 'hbs'
-i18n    = require '../i18n.coffee'
+i18n    = require '../i18n'
 
 # Application settings
 # ---------------------

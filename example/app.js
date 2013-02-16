@@ -8,7 +8,7 @@
 
   hbs = require('hbs');
 
-  i18n = require('../i18n.coffee');
+  i18n = require('../i18n');
 
   app = express();
 
