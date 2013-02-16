@@ -42,8 +42,6 @@ String definitions are automatically added to all available languages by adding 
 
 ### Templating / locals
 
-All the following examples are based on [handlebars](http://github.com/donpark/hbs) templates.
-
 Registering `app.locals(i18n.locals)` is simply a shortcut for:
 
     app.locals({
