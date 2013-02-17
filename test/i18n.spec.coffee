@@ -1,15 +1,6 @@
 assert = require 'assert'
 polyglot = require '../'
 
-describe 'Parse headers', ->
-
-    it 'should only accept valid locales', ->
-        assert.equal yes, polyglot.isValidLocale value for value in ['pt', 'pt-BR', 'en', 'en-US']
-        assert.equal no,  polyglot.isValidLocale value for value in ['pt-b', 'pt-', 'p', 'portugues']
-
-    it 'should fail silently for non-strings', ->
-        assert.equal no, polyglot.isValidLocale value for value in [null, undefined, 123, {}, []]
-
 describe 'Translations', ->
 
     polyglot.strings.pt =

@@ -1,10 +1,13 @@
 debugMode = off
 
-module.exports = 
-
+util = 
     extend: (obj, sources...) ->
         for source in sources
-            obj[key] = val for key, val of source
+            for key, val of source
+                if typeof val is 'object' and typeof obj[key] is 'object'
+                    util.extend obj[key], val
+                else
+                    obj[key] = val
         return obj
 
     parseJSON: (obj) ->
@@ -21,3 +24,5 @@ module.exports =
 
     toggleDebug: (status) ->
         debugMode = status
+
+module.exports = util
