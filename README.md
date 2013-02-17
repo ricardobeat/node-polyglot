@@ -13,10 +13,9 @@ Install with `npm install polyglot`:
 
     app.use(express.cookieParser())
     app.use(express.cookieSession())
-    app.use(i18n())
 
-    # register template locals
-    app.locals(i18n.locals)
+    app.use(i18n()          # add middleware
+    app.locals(i18n.locals) # register template locals
 
 Check the [example](https://github.com/ricardobeat/node-polyglot/tree/master/example) app.
 
@@ -28,21 +27,36 @@ Check the [example](https://github.com/ricardobeat/node-polyglot/tree/master/exa
       , path    : '/lang'  // path for .json language files
     }))
 
-### Language files
+### Storage engines and language files
 
-Translation files are `.json` files containing the translated strings. The default directory is `/lang`. To add a new language, just create an empty .json file with the language code as it's name (i.e. `de.json`).
+By default polyglot uses a JSON storage backend for translations, saving files to `options.path` (default: /lang). To add a new language, just create an empty .json file with the language code as it's name (e.g. `de.json` or 'en-UK.json'). These files can be sent to apps like [webtranslateit.com](http://webtranslateit.com) for management and collaborative translation efforts.
 
-See https://github.com/ricardobeat/node-polyglot/blob/master/example/lang/pt.json
+See [example/lang/pt.json](https://github.com/ricardobeat/node-polyglot/blob/master/example/lang/pt.json) for a sample.
 
-String definitions are automatically added to all available languages by adding the `updateStrings` middleware to your express config:
+### String collection / auto-updating
+
+String definitions are automatically added to all available languages by using the `updateStrings` middleware:
 
     app.configure('development', function(){
         app.use(i18n.updateStrings)
     })
 
+Different storage backends (MongoDB, Redis) can be used by adding a constructor to `i18n.store` and setting the `store` option:
+
+    function MongoStore () { ... }
+
+    i18n.store.mongo = MongoStore
+
+    //...
+    app.use(i18n({
+        store: 'mongo'
+    }))
+
+This object must implement the `load`, `save` and `update` methods, and will receive the `i18n` object as first argument on initialization. See the source for the JSON storage engine at [src/store.coffee](https://github.com/ricardobeat/node-polyglot/blob/master/src/store.coffee).
+
 ### Templating / locals
 
-Registering `app.locals(i18n.locals)` is simply a shortcut for:
+Registering `app.locals(i18n.locals)` is a shortcut for:
 
     app.locals({
         __        : i18n.translate
@@ -50,7 +64,7 @@ Registering `app.locals(i18n.locals)` is simply a shortcut for:
       , languages : i18n.languages
     })
 
-In addition to that, `i18n()` registers a middleware which sets `req.lang` and `req.locale` containing the user's settings.
+In addition to these locals, the `i18n()` middleware sets the `req.lang` and `req.locale` properties containing user settings.
 
 See the `/example` folder for an implementation using Handlebars helpers.
 
@@ -83,10 +97,17 @@ To change the current language call `i18n.setLanguage`, passing the user's sessi
         res.redirect(req.headers.referer || '/')
     })
 
-Accessing http://yourapp/lang/de will set language to `de`, *if* it is defined in the i18n.languages object.
+When accessing `http://yourapp.com/lang/de` the language will be set to `de`, *if* it's in the available languages (`i18n.languages`) list.
 
 ### Source code and tests
 
 Polyglot is written in coffeescript and distributed in js. [Read the annotated source here](http://ricardobeat.github.com/node-polyglot).
 
 Run tests using `mocha` or `npm test`. You need `coffee-script` and `mocha` installed globally on your machine.
+
+### Roadmap
+
+- implement simple default backends for MongoDB/Redis/LevelDB
+- example of serving a string map to a client-side app
+- tiny library implementing `translate` and `plural` on the client, bundled with the string map and served socket.io-style at `/polyglot/client.js`
+- support different pluralization rules
