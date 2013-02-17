@@ -1,3 +1,5 @@
+debugMode = off
+
 module.exports = 
 
     extend: (obj, sources...) ->
@@ -11,4 +13,11 @@ module.exports =
         return res
 
     isValidLocale: (locale) ->
-        return /^\w\w(-\w\w)?$/.test(locale)
+        # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.10
+        return /^\w{1,2}(-\w+)*$/.test(locale)
+
+    debug: (str) ->
+        debugMode && console.log "[i18n] #{str}"
+
+    toggleDebug: (status) ->
+        debugMode = status
