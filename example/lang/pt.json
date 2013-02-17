@@ -1,9 +1,10 @@
 {
-    "%s cup": "%s xícara",
-    "%s cups": "%s xícaras",
-    "no cups": "nenhuma xícara",
     "cookie": "biscoito",
     "bacon": "bacon",
-    "tea": "chá",
-    "and": "e"
+    "coffee": "café",
+    "and": "e",
+    "%s glass": "%s xícara",
+    "%s glasses": "%s xícaras",
+    "no glasses": "nenhuma xícara",
+    "of water": "de água"
 }

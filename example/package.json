@@ -1,11 +1,13 @@
 {
-  "name": "polyglot",
-  "version": "0.2.0",
+  "name": "polyglot-example",
+  "private": true,
+  "version": "0.0.0",
   "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
   "engines": {
-    "node": ">v0.4.5"
+    "node": "~v0.8"
   },
   "dependencies": {
-    "express": ""
+    "express": "",
+    "hbs": ""
   }
 }
