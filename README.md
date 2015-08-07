@@ -14,7 +14,7 @@ Install with `npm install polyglot`:
     app.use(express.cookieParser())
     app.use(express.cookieSession())
 
-    app.use(i18n()          # add middleware
+    app.use(i18n())         # add middleware
     app.locals(i18n.locals) # register template locals
 
 Check the [example](https://github.com/ricardobeat/node-polyglot/tree/master/example) app.
